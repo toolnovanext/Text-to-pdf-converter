@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Text to PDF Converter by Accessible Resource</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <style>
+        :root {
+            --primary-blue: #1a237e;
+            --accent-orange: #ff6d00;
+            --light-blue: #e8eaf6;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, var(--primary-blue), #0d47a1);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            width: 100%;
+            max-width: 800px;
+            transform: translateY(0);
+            animation: slideIn 0.5s ease-out;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateY(-20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        h1 {
+            color: var(--primary-blue);
+            text-align: center;
+            margin-bottom: 2rem;
+            font-size: 2.5rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .text-input {
+            width: 100%;
+            height: 300px;
+            padding: 1rem;
+            border: 3px solid var(--primary-blue);
+            border-radius: 10px;
+            resize: vertical;
+            font-size: 1rem;
+            margin-bottom: 1.5rem;
+            background-color: var(--light-blue);
+            transition: all 0.3s ease;
+        }
+
+        .text-input:focus {
+            outline: none;
+            border-color: var(--accent-orange);
+            box-shadow: 0 0 15px rgba(255,109,0,0.3);
+        }
+
+        .button-container {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 25px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            font-weight: bold;
+            letter-spacing: 1px;
+        }
+
+        .btn-generate {
+            background-color: var(--accent-orange);
+            color: white;
+        }
+
+        .btn-clear {
+            background-color: var(--primary-blue);
+            color: white;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 1rem;
+            }
+            
+            h1 {
+                font-size: 1.8rem;
+            }
+            
+            .text-input {
+                height: 200px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Text to PDF Converter 📄</h1>
+        <textarea class="text-input" placeholder="Enter or paste your text here..."></textarea>
+        <div class="button-container">
+            <button class="btn btn-clear" onclick="clearText()">Clear Text</button>
+            <button class="btn btn-generate" onclick="generatePDF()">Generate PDF</button>
+        </div>
+    </div>
+
+    <script>
+        function clearText() {
+            document.querySelector('.text-input').value = '';
+        }
+
+        function generatePDF() {
+            const text = document.querySelector('.text-input').value;
+            if (!text.trim()) {
+                alert('Please enter some text before generating PDF!');
+                return;
+            }
+
+            const doc = new jspdf.jsPDF();
+            const pageWidth = doc.internal.pageSize.getWidth();
+            const pageHeight = doc.internal.pageSize.getHeight();
+            const margin = 15;
+            const fontSize = 12;
+            
+            doc.setFontSize(fontSize);
+            doc.setFont('helvetica', 'normal');
+            
+            const lines = doc.splitTextToSize(text, pageWidth - margin * 2);
+            let cursorY = margin;
+
+            lines.forEach(line => {
+                if (cursorY > pageHeight - margin) {
+                    doc.addPage();
+                    cursorY = margin;
+                }
+                doc.text(line, margin, cursorY);
+                cursorY += fontSize * 0.6;
+            });
+
+            const timestamp = new Date().toISOString().replace(/[^0-9]/g, '').slice(0, -3);
+            const filename = `converted_text_${timestamp}.pdf`;
+            
+            doc.save(filename);
+        }
+
+        // Add button animations
+        document.querySelectorAll('.btn').forEach(button => {
+            button.addEventListener('click', function(e) {
+                e.currentTarget.style.transform = 'scale(0.95)';
+                setTimeout(() => {
+                    e.currentTarget.style.transform = '';
+                }, 100);
+            });
+        });
+    </script>
+</body>
+</html>
